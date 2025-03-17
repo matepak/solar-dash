@@ -1,28 +1,29 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { 
-  AppBar, 
-  Box, 
-  Container, 
-  Drawer, 
-  IconButton, 
-  Toolbar, 
-  Typography, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
-  ListItemButton, 
-  Divider, 
-  useMediaQuery, 
+import {
+  AppBar,
+  Box,
+  Container,
+  Drawer,
+  IconButton,
+  Toolbar,
+  Typography,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemButton,
+  Divider,
+  useMediaQuery,
   useTheme as useMuiTheme,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Grid
 } from '@mui/material';
-import { 
-  Menu as MenuIcon, 
-  Dashboard as DashboardIcon, 
-  Settings as SettingsIcon, 
+import {
+  Menu as MenuIcon,
+  Dashboard as DashboardIcon,
+  Settings as SettingsIcon,
   Image as ImageIcon,
   Logout as LogoutIcon,
   Login as LoginIcon,
@@ -33,6 +34,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import AlertsPanel from './AlertsPanel';
 
 const Layout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -69,10 +71,10 @@ const Layout: React.FC = () => {
 
   const drawer = (
     <Box>
-      <Toolbar 
-        sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+      <Toolbar
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           px: [1]
         }}
@@ -159,9 +161,9 @@ const Layout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar 
+      <AppBar
         position="fixed"
-        sx={{ 
+        sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           bgcolor: mode === 'dark' ? 'primary.dark' : 'primary.main'
         }}
@@ -181,7 +183,7 @@ const Layout: React.FC = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      
+
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
         open={isMobile ? drawerOpen : true}
@@ -189,15 +191,15 @@ const Layout: React.FC = () => {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { 
-            width: drawerWidth, 
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
             boxSizing: 'border-box',
           },
         }}
       >
         {drawer}
       </Drawer>
-      
+
       <Box
         component="main"
         sx={{
@@ -208,7 +210,14 @@ const Layout: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Outlet />
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <AlertsPanel />
+            </Grid>
+            <Grid item xs={12}>
+              <Outlet />
+            </Grid>
+          </Grid>
         </Container>
       </Box>
     </Box>

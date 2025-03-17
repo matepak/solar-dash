@@ -3,6 +3,7 @@ import axios from 'axios';
 // Set up API endpoints
 const KP_INDEX_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
 const KP_FORECAST_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
+const ALLERTS_URL = 'https://services.swpc.noaa.gov/products/alerts.json';
 
 // Define data types
 export interface KpIndexData {
@@ -18,6 +19,12 @@ export interface KpForecastData {
   kpValue: number;
   observed: 'observed' | 'estimated' | 'predicted';
   noaaScale: string;
+}
+
+export interface AlertsData {
+  product_id: string;
+  issue_datetime: string;
+  message: string;
 }
 
 // Function to map Kp values to colors
@@ -61,7 +68,7 @@ export const fetchKpIndexData = async (): Promise<KpIndexData[]> => {
   try {
     const response = await axios.get(KP_INDEX_URL);
     const data = response.data;
-    
+
     // Skip the header row
     const processedData = data.slice(1).map((row: any) => {
       const kpValue = parseFloat(row[1]);
@@ -73,7 +80,7 @@ export const fetchKpIndexData = async (): Promise<KpIndexData[]> => {
         color: mapKpToColor(kpValue)
       };
     });
-    
+
     return processedData;
   } catch (error) {
     console.error('Error fetching Kp index data:', error);
@@ -86,7 +93,7 @@ export const fetchKpForecastData = async (): Promise<KpForecastData[]> => {
   try {
     const response = await axios.get(KP_FORECAST_URL);
     const data = response.data;
-    
+
     // Skip the header row
     const processedData = data.slice(1)
       .filter((row: any) => row[2] === 'estimated' || row[2] === 'predicted')
@@ -99,7 +106,7 @@ export const fetchKpForecastData = async (): Promise<KpForecastData[]> => {
           noaaScale: mapKpToNoaaScale(kpValue)
         };
       });
-    
+
     return processedData;
   } catch (error) {
     console.error('Error fetching Kp forecast data:', error);
@@ -112,4 +119,17 @@ export const checkForGeomagneticStorm = (kpData: KpIndexData[]): boolean => {
   // Check the most recent 4 entries
   const recentEntries = kpData.slice(-4);
   return recentEntries.some(entry => entry.kpValue >= 5);
+};
+
+// Function to fetch and process alerts data
+export const fetchAlertsData = async (): Promise<AlertsData[]> => {
+  try {
+    const response = await axios.get(ALLERTS_URL);
+    const data = response.data;
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching alerts data:', error);
+    throw error;
+  }
 };

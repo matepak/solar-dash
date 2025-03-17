@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Paper, Typography, CircularProgress, Alert, useTheme } from '@mui/material';
-import GaugeChart from 'react-gauge-chart';
+import { GaugeComponent } from 'react-gauge-component';
 
 interface KpIndexGaugeProps {
   kpValue: number | null;
@@ -9,11 +9,11 @@ interface KpIndexGaugeProps {
   className?: string;
 }
 
-const KpIndexGauge: React.FC<KpIndexGaugeProps> = ({ 
-  kpValue, 
-  loading = false, 
-  error = null, 
-  className 
+const KpIndexGauge: React.FC<KpIndexGaugeProps> = ({
+  kpValue,
+  loading = false,
+  error = null,
+  className
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
@@ -64,53 +64,77 @@ const KpIndexGauge: React.FC<KpIndexGaugeProps> = ({
   }
 
   return (
-    <Paper 
-      className={className} 
-      sx={{ 
-        p: 2, 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
+    <Paper
+      className={className}
+      sx={{
+        p: 2,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}
     >
       <Typography variant="h6" component="div" gutterBottom>
         Current Kp Index
       </Typography>
-      
+
       {kpValue !== null ? (
         <>
-          <Box sx={{ width: '100%', maxWidth: 300 }}>
-            <GaugeChart
-              id="kp-gauge-chart"
-              nrOfLevels={9}
-              colors={['#00b050', '#92d050', '#ffff00', '#ffc000', '#ff0000', '#c00000', '#7f0000']}
-              arcWidth={0.3}
-              percent={kpValue / 9}
-              textColor={isDarkMode ? '#ffffff' : '#000000'}
-              needleColor={isDarkMode ? '#cccccc' : '#000000'}
-              needleBaseColor={isDarkMode ? '#aaaaaa' : '#444444'}
-              formatTextValue={() => kpValue.toFixed(1)}
+          <Box sx={{ width: '100%', maxWidth: 300, height: 200 }}>
+            <GaugeComponent
+              style={{ width: '100%', height: '100%' }}
+              type="radial"
+              value={kpValue}
+              minValue={0}
+              maxValue={9}
+              arc={{
+                colorArray: ['#00b050', '#92d050', '#ffff00', '#ffc000', '#ff0000', '#c00000', '#7f0000'],
+                width: 0.3,
+                padding: 0.02,
+                subArcs: [
+                  { limit: 3 },  // Green
+                  { limit: 4 },  // Light green
+                  { limit: 5 },  // Yellow
+                  { limit: 6 },  // Orange
+                  { limit: 7 },  // Red
+                  { limit: 8 },  // Dark red
+                  { limit: 9 }   // Very dark red
+                ]
+              }}
+              pointer={{
+                type: "needle",
+                color: isDarkMode ? '#cccccc' : '#000000',
+                baseColor: isDarkMode ? '#aaaaaa' : '#444444',
+                length: 0.6
+              }}
+              labels={{
+                valueLabel: {
+                  formatTextValue: value => value.toFixed(1),
+                  style: {
+                    fill: isDarkMode ? '#ffffff' : '#000000'
+                  }
+                }
+              }}
             />
           </Box>
-          
-          <Typography 
-            variant="h5" 
-            component="div" 
-            sx={{ 
-              mt: 1, 
-              color: getColor(Math.round(kpValue)), 
-              fontWeight: 'bold' 
+
+          <Typography
+            variant="h5"
+            component="div"
+            sx={{
+              mt: 1,
+              color: getColor(Math.round(kpValue)),
+              fontWeight: 'bold'
             }}
           >
             {getGScale(Math.round(kpValue))}
           </Typography>
-          
+
           <Typography variant="body1" sx={{ mt: 1, textAlign: 'center' }}>
             {getDescription(Math.round(kpValue))}
           </Typography>
-          
+
           {Math.round(kpValue) >= 5 && (
             <Alert severity="warning" sx={{ mt: 2, width: '100%' }}>
               Geomagnetic storm in progress. Aurora may be visible at higher latitudes.

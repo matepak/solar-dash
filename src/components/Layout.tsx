@@ -29,12 +29,13 @@ import {
   Login as LoginIcon,
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import AlertsPanel from './AlertsPanel'
+
 const Layout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useTheme();
@@ -68,6 +69,14 @@ const Layout: React.FC = () => {
 
   const drawerWidth = 240;
 
+  const drawerItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Alerts', icon: <NotificationsIcon />, path: '/alerts' },
+    { text: 'Aurora Gallery', icon: <ImageIcon />, path: '/gallery' },
+    { text: 'Profile', icon: <PersonIcon />, path: '/profile', requiresAuth: true },
+    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+  ];
+
   const drawer = (
     <Box>
       <Toolbar
@@ -84,22 +93,16 @@ const Layout: React.FC = () => {
       </Toolbar>
       <Divider />
       <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigation('/')}>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigation('/images')}>
-            <ListItemIcon>
-              <ImageIcon />
-            </ListItemIcon>
-            <ListItemText primary="Solar Images" />
-          </ListItemButton>
-        </ListItem>
+        {drawerItems.map((item) => (
+          <ListItem disablePadding key={item.path}>
+            <ListItemButton onClick={() => handleNavigation(item.path)}>
+              <ListItemIcon>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
       <Divider />
       <List>
@@ -209,14 +212,7 @@ const Layout: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <AlertsPanel />
-            </Grid>
-            <Grid item xs={12}>
-              <Outlet />
-            </Grid>
-          </Grid>
+          <Outlet />
         </Container>
       </Box>
     </Box>

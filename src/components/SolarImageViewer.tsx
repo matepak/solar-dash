@@ -23,7 +23,7 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 export const SolarImageViewer: React.FC = () => {
   const { images, loading, error, refetch, getImageUrl } = useSolarImages();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedResolution, setSelectedResolution] = useState('4096');
+  const [selectedResolution, setSelectedResolution] = useState('512');
   const theme = useTheme();
 
   if (loading) {
@@ -37,7 +37,7 @@ export const SolarImageViewer: React.FC = () => {
   if (error) {
     return (
       <Box p={2}>
-        <Alert severity="error" action={<Button color="inherit" size="small" onClick={refetch}>Retry</Button>}>
+        <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => refetch()}>Retry</Button>}>
           {error.message}
         </Alert>
       </Box>
@@ -53,7 +53,7 @@ export const SolarImageViewer: React.FC = () => {
   }
 
   const selectedImage = images[selectedIndex];
-  const imageUrl = getImageUrl(selectedImage);
+  const imageUrl = getImageUrl(selectedImage, selectedResolution);
 
   const handlePrevious = () => {
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -74,7 +74,10 @@ export const SolarImageViewer: React.FC = () => {
           <Select
             value={selectedResolution}
             label="Resolution"
-            onChange={(e) => setSelectedResolution(e.target.value)}
+            onChange={(e) => {
+              setSelectedResolution(e.target.value);
+              refetch(e.target.value);
+            }}
           >
             <MenuItem value="4096">4096x4096</MenuItem>
             <MenuItem value="2048">2048x2048</MenuItem>
@@ -155,7 +158,7 @@ export const SolarImageViewer: React.FC = () => {
             >
               <CardMedia
                 component="img"
-                image={getImageUrl(image)}
+                image={getImageUrl(image, selectedResolution)}
                 alt={image.title}
                 sx={{ height: 200, objectFit: 'contain', bgcolor: 'black' }}
               />

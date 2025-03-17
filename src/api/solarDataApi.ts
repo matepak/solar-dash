@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // SDO Image URLs
-const SDO_BASE_URL = 'https://sdo.gsfc.nasa.gov/assets/img/latest';
+export const SDO_BASE_URL = 'https://sdo.gsfc.nasa.gov/assets/img/latest';
 const SDO_CHANNELS = ['0094', '0131', '0171', '0193', '0211', '0304', '0335', '1600', '1700', 'HMIB', 'HMII', 'HMID', 'HMIBC', 'HMIIF', 'HMIIC'];
 const SDO_RESOLUTIONS = ['4096', '2048', '1024', '512'];
 
@@ -55,13 +55,12 @@ const getChannelDescription = (channel: string): string => {
 };
 
 // Function to fetch latest solar images from SDO
-export const fetchLatestSolarImages = async (): Promise<SolarImage[]> => {
+export const fetchLatestSolarImages = async (resolution: string = '512'): Promise<SolarImage[]> => {
   try {
     const images: SolarImage[] = [];
 
-    // We'll fetch the highest resolution (4096) for each channel
+    // Fetch images for each channel
     for (const channel of SDO_CHANNELS) {
-      const resolution = '4096';
       const filename = `latest_${resolution}_${channel}.jpg`;
       const url = `${SDO_BASE_URL}/${filename}`;
 

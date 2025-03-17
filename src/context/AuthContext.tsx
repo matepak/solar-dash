@@ -79,7 +79,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  // Debug all relevant environment variables
+  console.log('Environment Variables:', {
+    NODE_ENV: process.env.NODE_ENV,
+    DISABLE_REGISTRATION: process.env.REACT_APP_DISABLE_REGISTRATION,
+    FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY ? 'exists' : 'missing'
+  });
+
+  // More robust check with default value
+  const isDevelopment = process.env.REACT_APP_DISABLE_REGISTRATION === 'true' || false;
+  console.log('Registration is disabled:', isDevelopment);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

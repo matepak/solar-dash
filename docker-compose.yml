@@ -7,10 +7,12 @@ services:
       context: .
       args:
         - NODE_ENV=development
+        - REACT_APP_DISABLE_REGISTRATION=true
     ports:
       - "3000:80"
     environment:
       - NODE_ENV=development
+      - REACT_APP_DISABLE_REGISTRATION=true
     restart: unless-stopped
     # If you need to mount custom environment variables
     env_file:

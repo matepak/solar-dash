@@ -1,9 +1,13 @@
 # Build stage
 FROM node:16-alpine as build
 
-# Add build argument
+# Add build arguments
 ARG NODE_ENV=production
+ARG REACT_APP_DISABLE_REGISTRATION=false
+
+# Set environment variables
 ENV NODE_ENV=${NODE_ENV}
+ENV REACT_APP_DISABLE_REGISTRATION=${REACT_APP_DISABLE_REGISTRATION}
 
 WORKDIR /app
 

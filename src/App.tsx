@@ -21,21 +21,22 @@ import Layout from './components/Layout';
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div>Loading...</div>;
   }
-  
+
   if (!user) {
     return <Navigate to="/login" />;
   }
-  
+
   return <>{children}</>;
 };
 
 function App() {
   const { theme } = useTheme();
-  
+  const { isDevelopment } = useAuth();
+
   return (
     <MuiThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -44,15 +45,15 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
+            {!isDevelopment && <Route path="register" element={<Register />} />}
             <Route path="images" element={<SolarImages />} />
-            <Route 
-              path="profile" 
+            <Route
+              path="profile"
               element={
                 <ProtectedRoute>
                   <Profile />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="*" element={<NotFound />} />
           </Route>

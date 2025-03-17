@@ -22,27 +22,27 @@ const Login: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { login } = useAuth();
+
+  const { login, loginAsDemo, isDevelopment } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       setErrorMessage('Please enter both email and password');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      
+
       await login(email, password);
       navigate('/');
     } catch (error: any) {
       console.error(error);
-      
+
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         setErrorMessage('Invalid email or password');
       } else if (error.code === 'auth/too-many-requests') {
@@ -54,20 +54,20 @@ const Login: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Container component="main" maxWidth="xs">
       <Paper elevation={3} sx={{ p: 4, mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        
+
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
             {errorMessage}
           </Alert>
         )}
-        
+
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
@@ -97,9 +97,9 @@ const Login: React.FC = () => {
           />
           <FormControlLabel
             control={
-              <Checkbox 
-                value="remember" 
-                color="primary" 
+              <Checkbox
+                value="remember"
+                color="primary"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 disabled={isSubmitting}
@@ -122,18 +122,44 @@ const Login: React.FC = () => {
                 Forgot password?
               </Link>
             </Grid>
-            <Grid item>
-              <Link component={RouterLink} to="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
+            {!isDevelopment && (
+              <Grid item>
+                <Link component={RouterLink} to="/register" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </Paper>
-      
+
       <Box mt={2} textAlign="center">
-        <Typography variant="body2" color="text.secondary">
-          You can also continue as a guest to view the dashboard without an account.
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Try out the dashboard with our demo account to explore all features.
+        </Typography>
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ mt: 1, mb: 2 }}
+          onClick={async () => {
+            try {
+              setIsSubmitting(true);
+              setErrorMessage(null);
+              await loginAsDemo();
+              navigate('/');
+            } catch (error: any) {
+              console.error(error);
+              setErrorMessage('Failed to login as demo user. Please try again.');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+          disabled={isSubmitting}
+        >
+          Try Demo Account
+        </Button>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Or continue without an account to view public data.
         </Typography>
         <Button
           variant="outlined"

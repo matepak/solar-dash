@@ -25,16 +25,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Add error handling for auth state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log('User is signed in:', user.email);
-  } else {
-    console.log('User is signed out');
-  }
-}, (error) => {
-  console.error('Auth state change error:', error);
-});
+// Mock demo user data
+const MOCK_DEMO_USER: FirebaseUser = {
+  uid: 'demo-user-id',
+  email: 'demo@solardashboard.com',
+  displayName: 'Demo User',
+  emailVerified: true,
+  isAnonymous: false,
+  metadata: {
+    creationTime: new Date().toISOString(),
+    lastSignInTime: new Date().toISOString(),
+  },
+  phoneNumber: null,
+  photoURL: null,
+  providerId: 'demo',
+  providerData: [],
+  refreshToken: 'mock-refresh-token',
+  tenantId: null,
+  delete: async () => { },
+  getIdToken: async () => 'mock-id-token',
+  getIdTokenResult: async () => ({
+    token: 'mock-id-token',
+    authTime: new Date().toISOString(),
+    expirationTime: new Date(Date.now() + 3600000).toISOString(),
+    issuedAtTime: new Date().toISOString(),
+    signInProvider: null,
+    signInSecondFactor: null,
+    claims: {}
+  }),
+  reload: async () => { },
+  toJSON: () => ({})
+};
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -42,8 +63,10 @@ interface AuthContextType {
   error: string | null;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginAsDemo: () => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  isDevelopment: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -83,6 +107,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginAsDemo = async () => {
+    try {
+      setError(null);
+      // Set the mock demo user directly
+      setUser(MOCK_DEMO_USER);
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
       setError(null);
@@ -95,7 +130,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await firebaseSignOut(auth);
+      if (user === MOCK_DEMO_USER) {
+        // For demo user, just clear the user state
+        setUser(null);
+      } else {
+        await firebaseSignOut(auth);
+      }
     } catch (err: any) {
       setError(err.message);
       throw err;
@@ -118,8 +158,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     register,
     login,
+    loginAsDemo,
     logout,
-    resetPassword
+    resetPassword,
+    isDevelopment
   };
 
   return (

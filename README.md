@@ -4,6 +4,8 @@ A modern, React-based web application designed to display real-time data on sola
 
 This dashboard integrates data from NOAA and other space weather APIs to provide users with up-to-date information and customizable notifications.
 
+Demo app is available at https://sdodash.webgrove.pl/
+
 ## Features
 
 - **Real-time Data Display**: View current Kp-index and other solar activity metrics

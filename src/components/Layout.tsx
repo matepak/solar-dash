@@ -34,8 +34,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import AlertsPanel from './AlertsPanel';
-
+import AlertsPanel from './AlertsPanel'
 const Layout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useTheme();

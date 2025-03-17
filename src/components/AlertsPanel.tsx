@@ -13,7 +13,6 @@ import {
     IconButton,
     Tooltip
 } from '@mui/material';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -23,6 +22,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { startOfDay, endOfDay } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const getAlertIcon = (productId: string) => {
     // K06 and above are severe geomagnetic storms
@@ -49,7 +49,8 @@ const AlertsPanel: React.FC = () => {
     const [alerts, setAlerts] = useState<AlertsData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), new Date()]);
+    const [startDate, setStartDate] = useState<Date>(new Date());
+    const [endDate, setEndDate] = useState<Date>(new Date());
     const [currentPage, setCurrentPage] = useState(0);
     const alertsPerPage = 3;
 
@@ -78,11 +79,10 @@ const AlertsPanel: React.FC = () => {
     }, []);
 
     const filteredAlerts = alerts.filter(alert => {
-        if (!dateRange[0] || !dateRange[1]) return true;
         const alertDate = new Date(alert.issue_datetime);
-        const startDate = startOfDay(dateRange[0]);
-        const endDate = endOfDay(dateRange[1]);
-        return alertDate >= startDate && alertDate <= endDate;
+        const start = startOfDay(startDate);
+        const end = endOfDay(endDate);
+        return alertDate >= start && alertDate <= end;
     });
 
     const totalPages = Math.ceil(filteredAlerts.length / alertsPerPage);
@@ -100,7 +100,8 @@ const AlertsPanel: React.FC = () => {
     };
 
     const handleResetDateRange = () => {
-        setDateRange([new Date(), new Date()]);
+        setStartDate(new Date());
+        setEndDate(new Date());
         setCurrentPage(0);
     };
 
@@ -126,19 +127,37 @@ const AlertsPanel: React.FC = () => {
                 <Typography variant="h6">
                     Space Weather Alerts
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DateRangePicker
-                            localeText={{ start: 'Start date', end: 'End date' }}
-                            value={dateRange}
+                        <DatePicker
+                            label="Start Date"
+                            value={startDate}
                             onChange={(newValue) => {
-                                setDateRange(newValue);
-                                setCurrentPage(0);
+                                if (newValue) {
+                                    setStartDate(newValue);
+                                    setCurrentPage(0);
+                                }
                             }}
                             slotProps={{
                                 textField: {
-                                    size: "small",
-                                    sx: { width: 150 }
+                                    size: 'small',
+                                    sx: { maxWidth: '140px' }
+                                }
+                            }}
+                        />
+                        <DatePicker
+                            label="End Date"
+                            value={endDate}
+                            onChange={(newValue) => {
+                                if (newValue) {
+                                    setEndDate(newValue);
+                                    setCurrentPage(0);
+                                }
+                            }}
+                            slotProps={{
+                                textField: {
+                                    size: 'small',
+                                    sx: { maxWidth: '140px' }
                                 }
                             }}
                         />

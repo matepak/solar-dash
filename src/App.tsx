@@ -15,6 +15,7 @@ import Profile from './pages/Profile';
 import SolarImages from './pages/SolarImages';
 import NotFound from './pages/NotFound';
 import Alerts from './pages/Alerts';
+import AuroraImages from './pages/AuroraImages';
 
 // Layout
 import Layout from './components/Layout';
@@ -49,6 +50,7 @@ function App() {
             <Route path="login" element={<Login />} />
             {!isDevelopment && <Route path="register" element={<Register />} />}
             <Route path="images" element={<SolarImages />} />
+            <Route path="gallery" element={<AuroraImages />} />
             <Route
               path="profile"
               element={

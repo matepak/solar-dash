@@ -72,6 +72,7 @@ const Layout: React.FC = () => {
   const drawerItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Alerts', icon: <NotificationsIcon />, path: '/alerts' },
+    { text: 'Solar Images', icon: <ImageIcon />, path: '/images' },
     { text: 'Aurora Gallery', icon: <ImageIcon />, path: '/gallery' },
     { text: 'Profile', icon: <PersonIcon />, path: '/profile', requiresAuth: true },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },

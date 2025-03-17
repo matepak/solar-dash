@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:80"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     restart: unless-stopped
     # If you need to mount custom environment variables
     env_file:

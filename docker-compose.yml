@@ -3,7 +3,10 @@ version: '3.8'
 services:
   app:
     container_name: solar-dashboard
-    build: .
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
     ports:
       - "3000:80"
     environment:
@@ -11,4 +14,4 @@ services:
     restart: unless-stopped
     # If you need to mount custom environment variables
     env_file:
-      - .env.production
+      - .env.development

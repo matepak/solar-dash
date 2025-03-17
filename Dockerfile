@@ -1,6 +1,10 @@
 # Build stage
 FROM node:16-alpine as build
 
+# Add build argument
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
 WORKDIR /app
 
 # Copy package.json and package-lock.json

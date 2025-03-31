@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-// SDO Image URLs
-export const SDO_BASE_URL = 'https://sdo.gsfc.nasa.gov/assets/img/latest';
+// Base URL for SDO images
+export const SDO_BASE_URL = process.env.REACT_APP_SDO_BASE_URL || 'https://sdo.gsfc.nasa.gov/assets/img/latest';
 const SDO_CHANNELS = ['0094', '0131', '0171', '0193', '0211', '0304', '0335', '1600', '1700', 'HMIB', 'HMII', 'HMID', 'HMIBC', 'HMIIF', 'HMIIC'];
 const SDO_RESOLUTIONS = ['4096', '2048', '1024', '512'];
 
-// NASA API endpoints
-const SDO_LATEST_URL = 'https://api.nasa.gov/planetary/apod';
+// API URL for NASA APOD (used for SDO latest image info)
+const SDO_LATEST_URL = process.env.REACT_APP_APOD_URL || 'https://api.nasa.gov/planetary/apod';
 const NASA_API_KEY = process.env.REACT_APP_NASA_API_KEY || 'DEMO_KEY';
 
 // Types for solar data

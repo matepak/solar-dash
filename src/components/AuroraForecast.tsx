@@ -1,9 +1,15 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-const northernAuroraForecastUrl = 'https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg';
-const southernAuroraForecastUrl = 'https://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg';
+import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
+
+const northernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_NORTHERN_URL;
+const southernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_SOUTHERN_URL;
 
 const AuroraForecast: React.FC = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6">Aurora Forecast</Typography>

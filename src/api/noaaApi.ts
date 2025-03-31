@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Set up API endpoints
-const KP_INDEX_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
-const KP_FORECAST_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
-const ALLERTS_URL = 'https://services.swpc.noaa.gov/products/alerts.json';
+const KP_INDEX_URL = process.env.REACT_APP_KP_INDEX_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
+const KP_FORECAST_URL = process.env.REACT_APP_KP_FORECAST_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
+const ALERTS_URL = process.env.REACT_APP_ALERTS_URL || 'https://services.swpc.noaa.gov/products/alerts.json';
 
 // Define data types
 export interface KpIndexData {
@@ -124,10 +124,8 @@ export const checkForGeomagneticStorm = (kpData: KpIndexData[]): boolean => {
 // Function to fetch and process alerts data
 export const fetchAlertsData = async (): Promise<AlertsData[]> => {
   try {
-    const response = await axios.get(ALLERTS_URL);
-    const data = response.data;
-
-    return data;
+    const response = await axios.get<AlertsData[]>(ALERTS_URL);
+    return response.data;
   } catch (error) {
     console.error('Error fetching alerts data:', error);
     throw error;

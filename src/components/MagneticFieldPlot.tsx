@@ -152,8 +152,8 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
         yaxis3: { domain: [0.25, 0.5], title: 'Lon (°)', showgrid: true, gridcolor: '#ddd' },
         yaxis4: { domain: [0, 0.25], title: 'Lat (°)', showgrid: true, gridcolor: '#ddd', zeroline: true, zerolinecolor: '#999', zerolinewidth: 1 },
         showlegend: true,
-        legend: { x: 1.02, y: 1, xanchor: 'left' },
-        margin: { l: 60, r: 80, t: 50, b: 50 },
+        legend: { orientation: 'h', x: 1, y: 1.02, xanchor: 'right', yanchor: 'bottom' },
+        margin: { l: 30, r: 30, t: 50, b: 50 },
         hovermode: 'x unified',
     }), []);
 
@@ -195,13 +195,13 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
                 style={{ width: '100%', height: '100%' }}
                 config={{ responsive: true }}
             />
-            <Plot
+            {/* <Plot
                 data={dataClockAngle}
                 layout={layoutClockAngle}
                 useResizeHandler={true}
                 style={{ width: '100%', height: '100%' }}
                 config={{ responsive: true }}
-            />
+            /> */}
         </div>
     );
 }

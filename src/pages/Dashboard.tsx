@@ -10,7 +10,7 @@ import { useKpIndexData } from '../hooks/useKpIndexData';
 import { useKpForecastData } from '../hooks/useKpForecastData';
 import { useAuth } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertsContext';
-
+import NoaaMagPlotContainer from '../components/NoaaMagPlotContainer';
 const Dashboard: React.FC = () => {
   const { currentKpValue, loading: kpLoading, error: kpError } = useKpIndexData();
   const { maxForecastedKp } = useKpForecastData();
@@ -87,6 +87,9 @@ const Dashboard: React.FC = () => {
         </Grid>
         <Grid item xs={12}>
           <AuroraForecast />
+        </Grid>
+        <Grid item xs={12}>
+          <NoaaMagPlotContainer />
         </Grid>
       </Grid>
     </div>

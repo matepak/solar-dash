@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -33,21 +33,41 @@ const KpIndexGraph: React.FC<KpIndexGraphProps> = ({ className }) => {
   const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 2));
   const [endDate, setEndDate] = useState<Date>(new Date());
 
-  // Format data for the chart
-  const formatChartData = () => {
+  // Format and aggregate data for the chart with memoization
+  const chartData = useMemo(() => {
     const filtered = filteredData(startDate, endDate);
+
+    // If we have too many data points, aggregate them
+    if (filtered.length > 100) {
+      const interval = Math.ceil(filtered.length / 100); // Target ~100 points
+      const aggregated = [];
+
+      for (let i = 0; i < filtered.length; i += interval) {
+        const chunk = filtered.slice(i, i + interval);
+        const avgKp = chunk.reduce((sum, item) => sum + item.kpValue, 0) / chunk.length;
+        const maxKp = Math.max(...chunk.map(item => item.kpValue));
+
+        aggregated.push({
+          time: format(new Date(chunk[0].timeTag), 'HH:mm MM/dd'),
+          kp: avgKp,
+          maxKp,
+          color: chunk[0].color
+        });
+      }
+
+      return aggregated;
+    }
 
     return filtered.map(item => ({
       time: format(new Date(item.timeTag), 'HH:mm MM/dd'),
       kp: item.kpValue,
+      maxKp: item.kpValue,
       color: item.color
     }));
-  };
+  }, [filteredData, startDate, endDate]);
 
-  const chartData = formatChartData();
-
-  // Custom tooltip for the chart
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  // Memoize the tooltip component
+  const CustomTooltip = useCallback(({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <Paper sx={{ p: 1.5, boxShadow: 3 }}>
@@ -64,9 +84,8 @@ const KpIndexGraph: React.FC<KpIndexGraphProps> = ({ className }) => {
         </Paper>
       );
     }
-
     return null;
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -98,29 +117,19 @@ const KpIndexGraph: React.FC<KpIndexGraphProps> = ({ className }) => {
         <Typography variant="h6" gutterBottom component="div">
           Kp Index History
         </Typography>
-
         <Box sx={{ display: 'flex', gap: 2 }}>
           <DatePicker
             label="Start Date"
             value={startDate}
             onChange={(newValue) => newValue && setStartDate(newValue)}
-            slotProps={{
-              textField: {
-                size: 'small',
-                sx: { maxWidth: '140px' }
-              }
-            }}
+            maxDate={endDate}
           />
           <DatePicker
             label="End Date"
             value={endDate}
             onChange={(newValue) => newValue && setEndDate(newValue)}
-            slotProps={{
-              textField: {
-                size: 'small',
-                sx: { maxWidth: '140px' }
-              }
-            }}
+            minDate={startDate}
+            maxDate={new Date()}
           />
         </Box>
       </Box>
@@ -182,4 +191,4 @@ const KpIndexGraph: React.FC<KpIndexGraphProps> = ({ className }) => {
   );
 };
 
-export default KpIndexGraph;
+export default React.memo(KpIndexGraph);

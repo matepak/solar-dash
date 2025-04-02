@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Typography, Paper, Box, Alert, Button } from '@mui/material';
+import { Grid, Typography, Box, Alert, Button } from '@mui/material';
 import { Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import AuroraForecast from '../components/AuroraForecast';

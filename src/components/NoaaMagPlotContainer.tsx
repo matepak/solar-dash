@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNoaaMagData } from '../hooks/useNoaaMagData'; // Adjust path
-import MagneticFieldPlot, { processNoaaMagData } from './MagneticFieldPlot'; // Adjust path
+import MagneticFieldPlot from './MagneticFieldPlot'; // Adjust path
 
 function NoaaMagPlotContainer() {
     // Use the custom hook to get data and state

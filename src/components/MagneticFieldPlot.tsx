@@ -1,5 +1,5 @@
 // src/components/MagneticFieldPlot.js
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import { Data, Layout } from 'plotly.js';
 
@@ -144,28 +144,6 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
         hovermode: 'x unified',
     }), []);
 
-    // Memoize clock angle layout - MOVED
-    const layoutClockAngle: Partial<Layout> = useMemo(() => ({
-        title: 'Magnetic Field Clock Angle (arctan2(By, Bz))',
-        height: 250,
-        xaxis: { showgrid: true, gridcolor: '#ddd', tickformat: '%H:%M\n%Y-%m-%d' },
-        yaxis: {
-            title: 'Clock Angle (°)',
-            range: [-180, 180],
-            tickvals: [-180, -135, -90, -45, 0, 45, 90, 135, 180],
-            showgrid: true, gridcolor: '#ddd', zeroline: true, zerolinecolor: '#999', zerolinewidth: 1
-        },
-        shapes: aggregatedData.timeTag.length > 0 ? [
-            { type: 'line', x0: aggregatedData.timeTag[0], y0: 90, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: 90, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.timeTag[0], y0: -90, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: -90, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.timeTag[0], y0: 180, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: 180, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.timeTag[0], y0: -180, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: -180, line: { color: 'grey', width: 1, dash: 'dot' } },
-        ] : [],
-        showlegend: true,
-        legend: { x: 1.02, y: 1, xanchor: 'left' },
-        margin: { l: 60, r: 80, t: 50, b: 50 },
-        hovermode: 'closest',
-    }), [aggregatedData.timeTag]);
 
     // Conditional rendering based on plotData still happens here
     if (!plotData) {

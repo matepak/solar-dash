@@ -7,7 +7,7 @@ const southernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_SOUTHERN
 const AuroraForecast: React.FC = () => {
 
     return (
-        <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Paper sx={{ p: 2, boxShadow: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6">Aurora Forecast</Typography>
             <Box sx={{ gap: 2, p: 2, height: '100%', display: 'flex', flexDirection: 'row' }}>
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

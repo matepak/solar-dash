@@ -68,6 +68,7 @@ const KpIndexGauge: React.FC<KpIndexGaugeProps> = ({
       className={className}
       sx={{
         p: 2,
+        boxShadow: 3,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNoaaMagData } from '../hooks/useNoaaMagData'; // Adjust path
 import MagneticFieldPlot from './MagneticFieldPlot'; // Adjust path
+import { Paper } from '@mui/material';
 
 function NoaaMagPlotContainer() {
     // Use the custom hook to get data and state
@@ -39,14 +40,16 @@ function NoaaMagPlotContainer() {
 
     // Pass the processed plotData to the presentation component
     return (
-        <div>
-            <h2>NOAA SWPC Magnetic Field (Last 24 Hours)</h2>
-            {plotData ? (
-                <MagneticFieldPlot plotData={plotData} />
-            ) : (
-                <div>Could not process plot data.</div> // Handle processing errors
-            )}
-        </div>
+        <Paper sx={{ p: 2, boxShadow: 3 }}>
+            <div>
+                <h2>NOAA SWPC Magnetic Field (Last 24 Hours)</h2>
+                {plotData ? (
+                    <MagneticFieldPlot plotData={plotData} />
+                ) : (
+                    <div>Could not process plot data.</div> // Handle processing errors
+                )}
+            </div>
+        </Paper>
     );
 }
 

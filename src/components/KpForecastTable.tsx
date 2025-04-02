@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Typography, 
-  CircularProgress, 
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  CircularProgress,
   Alert,
   Box
 } from '@mui/material';
@@ -22,7 +22,7 @@ interface KpForecastTableProps {
 
 const KpForecastTable: React.FC<KpForecastTableProps> = ({ className }) => {
   const { data, loading, error } = useKpForecastData();
-  
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
@@ -30,7 +30,7 @@ const KpForecastTable: React.FC<KpForecastTableProps> = ({ className }) => {
       </Box>
     );
   }
-  
+
   if (error) {
     return (
       <Alert severity="error" sx={{ mb: 2 }}>
@@ -38,7 +38,7 @@ const KpForecastTable: React.FC<KpForecastTableProps> = ({ className }) => {
       </Alert>
     );
   }
-  
+
   // No data available
   if (data.length === 0) {
     return (
@@ -47,13 +47,13 @@ const KpForecastTable: React.FC<KpForecastTableProps> = ({ className }) => {
       </Alert>
     );
   }
-  
+
   return (
-    <Paper className={className} sx={{ width: '100%', overflow: 'hidden' }}>
+    <Paper className={className} sx={{ p: 2, boxShadow: 3, width: '100%', overflow: 'hidden' }}>
       <Typography variant="h6" sx={{ p: 2, pb: 0 }}>
         Kp Index Forecast
       </Typography>
-      
+
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="kp forecast table">
           <TableHead>
@@ -91,10 +91,10 @@ const KpForecastTable: React.FC<KpForecastTableProps> = ({ className }) => {
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          Forecast data is provided by NOAA Space Weather Prediction Center. "Estimated" indicates 
+          Forecast data is provided by NOAA Space Weather Prediction Center. "Estimated" indicates
           current estimation based on real-time data, while "Predicted" indicates forecast for
           upcoming periods.
         </Typography>

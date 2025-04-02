@@ -1,12 +1,8 @@
 // src/hooks/useNoaaMagData.js
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchMagData, MagData } from '../api/noaaApi';
 
-const NOAA_MAG_URL = 'https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json';
 const MAX_DATA_POINTS = 1000; // Limit the maximum number of data points
-
-// Define the expected structure of the data array
-type NoaaMagData = string[][];
 
 export function useNoaaMagData() {
     const [data, setData] = useState<MagData[] | null>(null);
@@ -16,7 +12,9 @@ export function useNoaaMagData() {
     const fetchData = useCallback(async () => {
         try {
             const data = await fetchMagData();
-            setData(data as MagData[]);
+            // Only keep the most recent MAX_DATA_POINTS
+            const limitedData = data.slice(-MAX_DATA_POINTS);
+            setData(limitedData as MagData[]);
         } catch (error) {
             console.error('Error fetching NOAA magnetic field data:', error);
             setError('Failed to fetch data');

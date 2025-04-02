@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchLatestSolarImages, getEpicImageUrl, SolarImage, SDO_BASE_URL } from '../api/solarDataApi';
+import { fetchLatestSolarImages, SolarImage, SDO_BASE_URL } from '../api/solarDataApi';
 
 interface SolarImagesHook {
   images: SolarImage[];

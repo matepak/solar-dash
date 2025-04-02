@@ -18,7 +18,6 @@ import {
   useTheme as useMuiTheme,
   Switch,
   FormControlLabel,
-  Grid
 } from '@mui/material';
 import {
   Menu as MenuIcon,

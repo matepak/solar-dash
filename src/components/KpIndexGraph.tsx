@@ -8,7 +8,7 @@ import {
   useTheme as useMuiTheme
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { format, addDays, subDays } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import {
   BarChart,
   Bar,
@@ -28,7 +28,7 @@ interface KpIndexGraphProps {
 
 const KpIndexGraph: React.FC<KpIndexGraphProps> = ({ className }) => {
   const muiTheme = useMuiTheme();
-  const { data, loading, error, filteredData } = useKpIndexData();
+  const { loading, error, filteredData } = useKpIndexData();
 
   const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 2));
   const [endDate, setEndDate] = useState<Date>(new Date());

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 
-const northernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_NORTHERN_URL;
-const southernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_SOUTHERN_URL;
+const northernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_NORTHERN_URL || 'https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg';
+const southernAuroraForecastUrl = process.env.REACT_APP_AURORA_FORECAST_SOUTHERN_URL || 'https://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg';
 
 const AuroraForecast: React.FC = () => {
 

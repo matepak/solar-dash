@@ -4,6 +4,7 @@ import axios from 'axios';
 const KP_INDEX_URL = process.env.REACT_APP_KP_INDEX_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
 const KP_FORECAST_URL = process.env.REACT_APP_KP_FORECAST_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
 const ALERTS_URL = process.env.REACT_APP_ALERTS_URL || 'https://services.swpc.noaa.gov/products/alerts.json';
+const NOAA_MAG_URL = process.env.REACT_APP_NOAA_MAG_URL || 'https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json';
 
 // Define data types
 export interface KpIndexData {
@@ -25,6 +26,16 @@ export interface AlertsData {
   product_id: string;
   issue_datetime: string;
   message: string;
+}
+
+export interface MagData {
+  timeTag: Date;
+  bx_gsm: number;
+  by_gsm: number;
+  bz_gsm: number;
+  lon_gsm: number;
+  lat_gsm: number;
+  bt: number;
 }
 
 // Function to map Kp values to colors
@@ -87,6 +98,34 @@ export const fetchKpIndexData = async (): Promise<KpIndexData[]> => {
     throw error;
   }
 };
+
+// Function to fetch and process NOAA magnetic field data
+export const fetchMagData = async (): Promise<MagData[]> => {
+  try {
+    const response = await axios.get(NOAA_MAG_URL);
+    const data = response.data;
+
+    // Skip the header row
+    const processedData = data.slice(1).map((row: any) => {
+      return {
+        timeTag: new Date(row[0]),
+        bx_gsm: parseFloat(row[1]),
+        by_gsm: parseFloat(row[2]),
+        bz_gsm: parseFloat(row[3]),
+        lon_gsm: parseFloat(row[4]),
+        lat_gsm: parseFloat(row[5]),
+        bt: parseFloat(row[6])
+      };
+    });
+
+    return processedData;
+  } catch (error) {
+    console.error('Error fetching NOAA magnetic field data:', error);
+    throw error;
+  }
+};
+
+
 
 // Function to fetch and process Kp forecast data
 export const fetchKpForecastData = async (): Promise<KpForecastData[]> => {

@@ -16,7 +16,6 @@ export const useKpIndexData = (): KpIndexDataHook => {
   const [data, setData] = useState<KpIndexData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,7 +26,6 @@ export const useKpIndexData = (): KpIndexDataHook => {
       // Only keep the most recent MAX_DATA_POINTS
       const limitedData = kpData.slice(-MAX_DATA_POINTS);
       setData(limitedData);
-      setLastFetched(new Date());
     } catch (err: any) {
       setError(err);
       console.error('Error in useKpIndexData hook:', err);

@@ -4,14 +4,13 @@ import Plot from 'react-plotly.js';
 import { Data, Layout } from 'plotly.js';
 
 interface PlotData {
-    time: Date[];
-    bx: number[];
-    by: number[];
-    bz: number[];
-    lon: number[];
-    lat: number[];
+    timeTag: Date[];
+    bx_gsm: number[];
+    by_gsm: number[];
+    bz_gsm: number[];
+    lon_gsm: number[];
+    lat_gsm: number[];
     bt: number[];
-    clockAngle: number[];
 }
 
 // Helper function to aggregate data points
@@ -51,27 +50,26 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
         if (!plotData) {
             // Return default structure if plotData is not available
             return {
-                time: [], bx: [], by: [], bz: [], lon: [], lat: [], bt: [], clockAngle: []
+                timeTag: [], bx_gsm: [], by_gsm: [], bz_gsm: [], lon_gsm: [], lat_gsm: [], bt: []
             };
         }
         const targetPoints = 200; // Target number of points for each series
         return {
-            time: aggregateData(plotData.time, targetPoints),
-            bx: aggregateData(plotData.bx, targetPoints),
-            by: aggregateData(plotData.by, targetPoints),
-            bz: aggregateData(plotData.bz, targetPoints),
-            lon: aggregateData(plotData.lon, targetPoints),
-            lat: aggregateData(plotData.lat, targetPoints),
+            timeTag: aggregateData(plotData.timeTag, targetPoints),
+            bx_gsm: aggregateData(plotData.bx_gsm, targetPoints),
+            by_gsm: aggregateData(plotData.by_gsm, targetPoints),
+            bz_gsm: aggregateData(plotData.bz_gsm, targetPoints),
+            lon_gsm: aggregateData(plotData.lon_gsm, targetPoints),
+            lat_gsm: aggregateData(plotData.lat_gsm, targetPoints),
             bt: aggregateData(plotData.bt, targetPoints),
-            clockAngle: aggregateData(plotData.clockAngle, targetPoints)
         };
     }, [plotData]);
 
     // Memoize plot data - MOVED
     const dataTimeSeries: Data[] = useMemo(() => [
         {
-            x: aggregatedData.time,
-            y: aggregatedData.bx,
+            x: aggregatedData.timeTag,
+            y: aggregatedData.bx_gsm,
             type: 'scatter',
             mode: 'lines',
             name: 'Bx GSM',
@@ -80,8 +78,8 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
         {
-            x: aggregatedData.time,
-            y: aggregatedData.by,
+            x: aggregatedData.timeTag,
+            y: aggregatedData.by_gsm,
             type: 'scatter',
             mode: 'lines',
             name: 'By GSM',
@@ -90,8 +88,8 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
         {
-            x: aggregatedData.time,
-            y: aggregatedData.bz,
+            x: aggregatedData.timeTag,
+            y: aggregatedData.bz_gsm,
             type: 'scatter',
             mode: 'lines',
             name: 'Bz GSM',
@@ -100,7 +98,7 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
         {
-            x: aggregatedData.time,
+            x: aggregatedData.timeTag,
             y: aggregatedData.bt,
             type: 'scatter',
             mode: 'lines',
@@ -110,8 +108,8 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
         {
-            x: aggregatedData.time,
-            y: aggregatedData.lon,
+            x: aggregatedData.timeTag,
+            y: aggregatedData.lon_gsm,
             type: 'scatter',
             mode: 'lines',
             name: 'Longitude GSM',
@@ -120,8 +118,8 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
         {
-            x: aggregatedData.time,
-            y: aggregatedData.lat,
+            x: aggregatedData.timeTag,
+            y: aggregatedData.lat_gsm,
             type: 'scatter',
             mode: 'lines',
             name: 'Latitude GSM',
@@ -130,17 +128,6 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             connectgaps: false
         },
     ], [aggregatedData]);
-
-    // Memoize clock angle data - MOVED
-    const dataClockAngle: Data[] = useMemo(() => [{
-        x: aggregatedData.time,
-        y: aggregatedData.clockAngle,
-        type: 'scatter',
-        mode: 'markers',
-        name: 'Clock Angle',
-        marker: { color: 'cyan', size: 3 },
-        connectgaps: false,
-    }], [aggregatedData]);
 
     // Memoize layouts - MOVED
     const layoutTimeSeries: Partial<Layout> = useMemo(() => ({
@@ -168,17 +155,17 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
             tickvals: [-180, -135, -90, -45, 0, 45, 90, 135, 180],
             showgrid: true, gridcolor: '#ddd', zeroline: true, zerolinecolor: '#999', zerolinewidth: 1
         },
-        shapes: aggregatedData.time.length > 0 ? [
-            { type: 'line', x0: aggregatedData.time[0], y0: 90, x1: aggregatedData.time[aggregatedData.time.length - 1], y1: 90, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.time[0], y0: -90, x1: aggregatedData.time[aggregatedData.time.length - 1], y1: -90, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.time[0], y0: 180, x1: aggregatedData.time[aggregatedData.time.length - 1], y1: 180, line: { color: 'grey', width: 1, dash: 'dot' } },
-            { type: 'line', x0: aggregatedData.time[0], y0: -180, x1: aggregatedData.time[aggregatedData.time.length - 1], y1: -180, line: { color: 'grey', width: 1, dash: 'dot' } },
+        shapes: aggregatedData.timeTag.length > 0 ? [
+            { type: 'line', x0: aggregatedData.timeTag[0], y0: 90, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: 90, line: { color: 'grey', width: 1, dash: 'dot' } },
+            { type: 'line', x0: aggregatedData.timeTag[0], y0: -90, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: -90, line: { color: 'grey', width: 1, dash: 'dot' } },
+            { type: 'line', x0: aggregatedData.timeTag[0], y0: 180, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: 180, line: { color: 'grey', width: 1, dash: 'dot' } },
+            { type: 'line', x0: aggregatedData.timeTag[0], y0: -180, x1: aggregatedData.timeTag[aggregatedData.timeTag.length - 1], y1: -180, line: { color: 'grey', width: 1, dash: 'dot' } },
         ] : [],
         showlegend: true,
         legend: { x: 1.02, y: 1, xanchor: 'left' },
         margin: { l: 60, r: 80, t: 50, b: 50 },
         hovermode: 'closest',
-    }), [aggregatedData.time]);
+    }), [aggregatedData.timeTag]);
 
     // Conditional rendering based on plotData still happens here
     if (!plotData) {
@@ -195,13 +182,6 @@ function MagneticFieldPlot({ plotData }: { plotData: PlotData | null | undefined
                 style={{ width: '100%', height: '100%' }}
                 config={{ responsive: true }}
             />
-            {/* <Plot
-                data={dataClockAngle}
-                layout={layoutClockAngle}
-                useResizeHandler={true}
-                style={{ width: '100%', height: '100%' }}
-                config={{ responsive: true }}
-            /> */}
         </div>
     );
 }

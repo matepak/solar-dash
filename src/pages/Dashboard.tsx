@@ -19,9 +19,8 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   // Determine if there should be an alert shown (current or forecasted storm conditions)
-  const shouldShowStormAlert =
-    (currentKpValue !== null && currentKpValue >= 5) ||
-    (maxForecastedKp >= 5);
+  const hasCurrentStorm = currentKpValue !== null && currentKpValue >= 5;
+  const hasForecastedStorm = maxForecastedKp >= 5;
 
   // Determine if the user should be notified based on their alert settings
   const shouldNotifyUser =
@@ -39,7 +38,23 @@ const Dashboard: React.FC = () => {
           Monitor real-time Kp index data, forecast, and geomagnetic storm conditions.
         </Typography>
 
-        {shouldShowStormAlert && (
+        {hasCurrentStorm && (
+          <Alert
+            severity="error"
+            sx={{ mb: 3 }}
+            action={
+              user ? null : (
+                <Button color="inherit" size="small" onClick={() => navigate('/login')}>
+                  Login for alerts
+                </Button>
+              )
+            }
+          >
+            Active geomagnetic storm detected! Current Kp index is {currentKpValue}. Aurora may be visible at higher latitudes.
+          </Alert>
+        )}
+
+        {hasForecastedStorm && !hasCurrentStorm && (
           <Alert
             severity="warning"
             sx={{ mb: 3 }}
@@ -51,7 +66,7 @@ const Dashboard: React.FC = () => {
               )
             }
           >
-            Geomagnetic storm conditions detected! Aurora may be visible at higher latitudes.
+            Geomagnetic storm forecasted! Maximum forecasted Kp index is {maxForecastedKp}. Monitor conditions for potential aurora visibility.
           </Alert>
         )}
 

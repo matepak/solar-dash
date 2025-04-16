@@ -1,6 +1,6 @@
 // src/hooks/useNoaaMagData.js
 import { useState, useEffect, useCallback } from 'react';
-import { fetchMagData, MagData } from '../api/noaaApi';
+import { fetchMagData, fetchPlasmaData, PlasmaData, MagData, calculateSolarWindPropagationTime } from '../api/noaaApi';
 
 const MAX_DATA_POINTS = 1000; // Limit the maximum number of data points
 
@@ -30,6 +30,8 @@ export function useNoaaMagData() {
             if (isMounted) {
                 setIsLoading(true);
                 await fetchData();
+                const plasmaData = await fetchPlasmaData();
+                console.log('solar wind propagation time: ', calculateSolarWindPropagationTime(plasmaData));
             }
         };
 

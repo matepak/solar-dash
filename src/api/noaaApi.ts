@@ -1,11 +1,13 @@
 import axios from 'axios';
 
+const DSCOVR_DISTANCE_FROM_EARTH = 1500000 //km
+
 // Set up API endpoints
 const KP_INDEX_URL = process.env.REACT_APP_KP_INDEX_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
 const KP_FORECAST_URL = process.env.REACT_APP_KP_FORECAST_URL || 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
 const ALERTS_URL = process.env.REACT_APP_ALERTS_URL || 'https://services.swpc.noaa.gov/products/alerts.json';
 const NOAA_MAG_URL = process.env.REACT_APP_NOAA_MAG_URL || 'https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json';
-
+const NOAA_PLASMA_URL = process.env.REACT_APP_NOAA_PLASMA_URL || 'https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json';
 // Define data types
 export interface KpIndexData {
   timeTag: Date;
@@ -36,6 +38,13 @@ export interface MagData {
   lon_gsm: number;
   lat_gsm: number;
   bt: number;
+}
+
+export interface PlasmaData {
+  timeTag: Date;
+  protonDensity: number;
+  temperature: number;
+  velocity: number;
 }
 
 // Function to map Kp values to colors
@@ -125,6 +134,29 @@ export const fetchMagData = async (): Promise<MagData[]> => {
   }
 };
 
+// Function to fetch and process NOAA plasma data
+export const fetchPlasmaData = async (): Promise<PlasmaData[]> => {
+  try {
+    const response = await axios.get(NOAA_PLASMA_URL);
+    const data = response.data;
+
+    // Skip the header row
+    const processedData = data.slice(1).map((row: any) => {
+      return {
+        timeTag: new Date(row[0]),
+        protonDensity: parseFloat(row[1]),
+        speed: parseFloat(row[2]),
+        temperature: parseFloat(row[3]),
+      };
+    });
+
+    return processedData;
+  } catch (error) {
+    console.error('Error fetching NOAA plasma data:', error);
+    throw error;
+  }
+};
+
 
 
 // Function to fetch and process Kp forecast data
@@ -170,3 +202,15 @@ export const fetchAlertsData = async (): Promise<AlertsData[]> => {
     throw error;
   }
 };
+
+// Function to calculate solar wind propagation time from DSCOVR to Earth
+export const calculateSolarWindPropagationTime = (plasmaData: PlasmaData[]): number => {
+  // Get the most recent plasma data by using slice(-1) which returns the last element
+  // of the array as a new array, then [0] accesses that single element
+  const recentData = plasmaData.slice(-1)[0];
+
+  // Calculate the propagation time in minutes
+  const propagationTime = DSCOVR_DISTANCE_FROM_EARTH / recentData.velocity / 60;
+  return propagationTime;
+};
+

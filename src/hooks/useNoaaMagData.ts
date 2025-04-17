@@ -30,8 +30,8 @@ export function useNoaaMagData() {
             if (isMounted) {
                 setIsLoading(true);
                 await fetchData();
-                await calculateSolarWindPropagationTime().then(propagationTime => {
-                    console.log('propagationTime: ', propagationTime);
+                fetchPlasmaData().then(plasmaData => {
+                    console.log('propagationTime: ', calculateSolarWindPropagationTime(plasmaData));
                 });
             }
         };

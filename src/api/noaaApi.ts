@@ -185,12 +185,6 @@ export const fetchKpForecastData = async (): Promise<KpForecastData[]> => {
   }
 };
 
-// Function to check if there's an active geomagnetic storm
-export const checkForGeomagneticStorm = (kpData: KpIndexData[]): boolean => {
-  // Check the most recent 4 entries
-  const recentEntries = kpData.slice(-4);
-  return recentEntries.some(entry => entry.kpValue >= 5);
-};
 
 // Function to fetch and process alerts data
 export const fetchAlertsData = async (): Promise<AlertsData[]> => {
@@ -204,17 +198,20 @@ export const fetchAlertsData = async (): Promise<AlertsData[]> => {
 };
 
 // Function to calculate solar wind propagation time from DSCOVR to Earth
-export const calculateSolarWindPropagationTime = async (): Promise<number> => {
-  return await fetchPlasmaData().then(data => {
-    const recentData = data.slice(-1)[0];
-    // Check if recentData exists and has a valid speed property
-    if (!recentData || typeof recentData.speed !== 'number' || isNaN(recentData.speed) || recentData.speed === 0) {
-      console.error('Invalid or missing plasma speed data:', recentData);
-      return NaN; // or throw new Error('Invalid plasma data') if you prefer
-    }
-    // Calculate the propagation time in minutes
-    const propagationTime = DSCOVR_DISTANCE_FROM_EARTH / recentData.speed / 60;
-    return propagationTime;
-  });
+export const calculateSolarWindPropagationTime = (plasmaData: PlasmaData[]): number => {
+  const recentData = plasmaData.slice(-1)[0];
+  // Check if recentData exists and has a valid speed property
+  if (!recentData || typeof recentData.speed !== 'number' || isNaN(recentData.speed) || recentData.speed === 0) {
+    console.error('Invalid or missing plasma speed data:', recentData);
+    throw new Error('Invalid plasma data');
+  }
+  // Calculate the propagation time in minutes
+  return (DSCOVR_DISTANCE_FROM_EARTH / recentData.speed / 60);
 };
 
+// Function to check if there's an active geomagnetic storm
+export const checkForGeomagneticStorm = (kpData: KpIndexData[]): boolean => {
+  // Check the most recent 4 entries
+  const recentEntries = kpData.slice(-4);
+  return recentEntries.some(entry => entry.kpValue >= 5);
+};

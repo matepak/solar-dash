@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   AppBar,
@@ -18,6 +18,8 @@ import {
   useTheme as useMuiTheme,
   Switch,
   FormControlLabel,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -34,14 +36,59 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useAlerts } from '../context/AlertsContext';
+import { useKpIndexData } from '../hooks/useKpIndexData';
+import { playNotificationSound } from '../utils/notificationSound';
 
 const Layout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { mode, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { alertSettings } = useAlerts();
+  const { currentKpValue } = useKpIndexData();
   const navigate = useNavigate();
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+
+  // In-app push notification state
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const hasNotifiedRef = useRef(false);
+  const previousKpRef = useRef<number | null>(null);
+
+  // Watch Kp value and show a toast when it crosses the user's threshold
+  useEffect(() => {
+    if (
+      !user ||
+      !alertSettings.pushNotifications ||
+      currentKpValue === null
+    ) {
+      return;
+    }
+
+    const threshold = alertSettings.kpThreshold;
+    const previousKp = previousKpRef.current;
+    previousKpRef.current = currentKpValue;
+
+    // If Kp dropped below threshold, reset so we can notify again next time
+    if (currentKpValue < threshold) {
+      hasNotifiedRef.current = false;
+      return;
+    }
+
+    // Kp is at or above threshold — notify once
+    if (!hasNotifiedRef.current) {
+      // Only show if this is a new crossing (previousKp was below or first load)
+      if (previousKp === null || previousKp < threshold) {
+        setNotificationMessage(
+          `⚡ Geomagnetic storm alert! Kp index is ${currentKpValue} (your threshold: ${threshold}). Aurora may be visible!`
+        );
+        setNotificationOpen(true);
+        playNotificationSound();
+      }
+      hasNotifiedRef.current = true;
+    }
+  }, [currentKpValue, user, alertSettings.pushNotifications, alertSettings.kpThreshold]);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -213,6 +260,23 @@ const Layout: React.FC = () => {
           <Outlet />
         </Container>
       </Box>
+      {/* In-app push notification toast */}
+      <Snackbar
+        open={notificationOpen}
+        autoHideDuration={12000}
+        onClose={() => setNotificationOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ mt: 7 }}
+      >
+        <Alert
+          onClose={() => setNotificationOpen(false)}
+          severity="warning"
+          variant="filled"
+          sx={{ width: '100%', fontSize: '0.95rem' }}
+        >
+          {notificationMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

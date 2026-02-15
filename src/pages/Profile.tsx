@@ -23,13 +23,15 @@ import {
   CardActions,
   IconButton,
   Tooltip,
-  Avatar
+  Avatar,
+  Snackbar
 } from '@mui/material';
-import { CameraAlt as CameraAltIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { CameraAlt as CameraAltIcon, Delete as DeleteIcon, VolumeUp as VolumeUpIcon } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth, app } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertsContext';
+import { playNotificationSound } from '../utils/notificationSound';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -43,6 +45,14 @@ const Profile: React.FC = () => {
   const [alertFrequency, setAlertFrequency] = useState(alertSettings.alertFrequency);
   const [locations, setLocations] = useState<string[]>(alertSettings.locations || []);
   const [newLocation, setNewLocation] = useState('');
+
+  // Test notification state
+  const [testNotificationOpen, setTestNotificationOpen] = useState(false);
+
+  const handleTestNotification = () => {
+    playNotificationSound();
+    setTestNotificationOpen(true);
+  };
 
   // Profile image state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -247,252 +257,283 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Profile & Preferences
-      </Typography>
+    <>
+      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Profile & Preferences
+        </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* Hidden file input for image selection */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageSelect}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  id="profile-image-input"
-                />
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {/* Hidden file input for image selection */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageSelect}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    id="profile-image-input"
+                  />
 
-                <Tooltip title="Click to change profile photo">
-                  <Box
-                    onClick={handleAvatarClick}
-                    sx={{
-                      position: 'relative',
-                      width: 80,
-                      height: 80,
-                      mb: 2,
-                      cursor: 'pointer',
-                      '&:hover .avatar-overlay': {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    <Avatar
-                      src={profileImage || undefined}
+                  <Tooltip title="Click to change profile photo">
+                    <Box
+                      onClick={handleAvatarClick}
                       sx={{
+                        position: 'relative',
                         width: 80,
                         height: 80,
-                        bgcolor: 'primary.main',
-                        color: 'white',
-                        fontSize: '2rem',
+                        mb: 2,
+                        cursor: 'pointer',
+                        '&:hover .avatar-overlay': {
+                          opacity: 1,
+                        },
                       }}
                     >
-                      {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                    </Avatar>
+                      <Avatar
+                        src={profileImage || undefined}
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          bgcolor: 'primary.main',
+                          color: 'white',
+                          fontSize: '2rem',
+                        }}
+                      >
+                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                      </Avatar>
 
-                    {/* Camera overlay on hover */}
-                    <Box
-                      className="avatar-overlay"
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '50%',
-                        bgcolor: 'rgba(0, 0, 0, 0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transition: 'opacity 0.2s ease-in-out',
-                      }}
-                    >
-                      {imageUploading ? (
-                        <CircularProgress size={24} sx={{ color: 'white' }} />
-                      ) : (
-                        <CameraAltIcon sx={{ color: 'white', fontSize: 28 }} />
-                      )}
+                      {/* Camera overlay on hover */}
+                      <Box
+                        className="avatar-overlay"
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          bgcolor: 'rgba(0, 0, 0, 0.5)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0,
+                          transition: 'opacity 0.2s ease-in-out',
+                        }}
+                      >
+                        {imageUploading ? (
+                          <CircularProgress size={24} sx={{ color: 'white' }} />
+                        ) : (
+                          <CameraAltIcon sx={{ color: 'white', fontSize: 28 }} />
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                </Tooltip>
-
-                {/* Remove image button */}
-                {profileImage && (
-                  <Tooltip title="Remove profile photo">
-                    <IconButton
-                      size="small"
-                      onClick={handleRemoveImage}
-                      sx={{ mb: 1, color: 'text.secondary' }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
                   </Tooltip>
-                )}
 
-                <Typography variant="h6">
-                  {user.displayName || 'User'}
+                  {/* Remove image button */}
+                  {profileImage && (
+                    <Tooltip title="Remove profile photo">
+                      <IconButton
+                        size="small"
+                        onClick={handleRemoveImage}
+                        sx={{ mb: 1, color: 'text.secondary' }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
+                  <Typography variant="h6">
+                    {user.displayName || 'User'}
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {user.email}
+                  </Typography>
+                </Box>
+              </CardContent>
+              <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
+                <Button size="small" variant="outlined">
+                  Edit Profile
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Alert Preferences
+              </Typography>
+
+              {saveSuccess && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  Your settings have been saved successfully.
+                </Alert>
+              )}
+
+              {saveError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {saveError}
+                </Alert>
+              )}
+
+              <Box sx={{ mb: 3 }}>
+                <Typography id="kp-threshold-slider" gutterBottom>
+                  Kp Alert Threshold
                 </Typography>
-
+                <Slider
+                  value={kpThreshold}
+                  onChange={(_, newValue) => setKpThreshold(newValue as number)}
+                  getAriaValueText={getKpLabel}
+                  valueLabelFormat={getKpLabel}
+                  step={1}
+                  marks
+                  min={1}
+                  max={9}
+                  valueLabelDisplay="auto"
+                  aria-labelledby="kp-threshold-slider"
+                />
                 <Typography variant="body2" color="text.secondary">
-                  {user.email}
+                  You will receive alerts when the Kp index reaches or exceeds this value.
                 </Typography>
               </Box>
-            </CardContent>
-            <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
-              <Button size="small" variant="outlined">
-                Edit Profile
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
 
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Alert Preferences
-            </Typography>
-
-            {saveSuccess && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                Your settings have been saved successfully.
-              </Alert>
-            )}
-
-            {saveError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {saveError}
-              </Alert>
-            )}
-
-            <Box sx={{ mb: 3 }}>
-              <Typography id="kp-threshold-slider" gutterBottom>
-                Kp Alert Threshold
-              </Typography>
-              <Slider
-                value={kpThreshold}
-                onChange={(_, newValue) => setKpThreshold(newValue as number)}
-                getAriaValueText={getKpLabel}
-                valueLabelFormat={getKpLabel}
-                step={1}
-                marks
-                min={1}
-                max={9}
-                valueLabelDisplay="auto"
-                aria-labelledby="kp-threshold-slider"
-              />
-              <Typography variant="body2" color="text.secondary">
-                You will receive alerts when the Kp index reaches or exceeds this value.
-              </Typography>
-            </Box>
-
-            <FormGroup sx={{ mb: 3 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={emailAlerts}
-                    onChange={(e) => setEmailAlerts(e.target.checked)}
-                  />
-                }
-                label="Email Alerts"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={pushNotifications}
-                    onChange={(e) => setPushNotifications(e.target.checked)}
-                  />
-                }
-                label="Push Notifications"
-              />
-            </FormGroup>
-
-            <FormControl fullWidth sx={{ mb: 3 }}>
-              <InputLabel id="alert-frequency-label">Alert Frequency</InputLabel>
-              <Select
-                labelId="alert-frequency-label"
-                id="alert-frequency"
-                value={alertFrequency}
-                label="Alert Frequency"
-                onChange={(e) => setAlertFrequency(e.target.value as 'immediately' | 'daily' | 'weekly')}
-              >
-                <MenuItem value="immediately">Immediately</MenuItem>
-                <MenuItem value="daily">Daily Digest</MenuItem>
-                <MenuItem value="weekly">Weekly Summary</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Divider sx={{ my: 3 }} />
-
-            <Typography variant="h6" gutterBottom>
-              Locations
-            </Typography>
-
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Add locations to receive aurora viewing opportunities specific to your area.
-              </Typography>
-
-              <Grid container spacing={2}>
-                <Grid item xs={8}>
-                  <TextField
-                    fullWidth
-                    label="Add Location"
-                    value={newLocation}
-                    onChange={(e) => setNewLocation(e.target.value)}
-                    placeholder="City, Country"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    variant="contained"
-                    onClick={handleAddLocation}
-                    disabled={!newLocation}
-                    fullWidth
-                    sx={{ height: '100%' }}
-                  >
-                    Add
-                  </Button>
-                </Grid>
-              </Grid>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              {locations.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No locations added yet.
-                </Typography>
-              ) : (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {locations.map((location) => (
-                    <Chip
-                      key={location}
-                      label={location}
-                      onDelete={() => handleRemoveLocation(location)}
+              <FormGroup sx={{ mb: 3 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={emailAlerts}
+                      onChange={(e) => setEmailAlerts(e.target.checked)}
                     />
-                  ))}
+                  }
+                  label="Email Alerts"
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={pushNotifications}
+                        onChange={(e) => setPushNotifications(e.target.checked)}
+                      />
+                    }
+                    label="Push Notifications"
+                  />
+                  <Tooltip title="Test notification sound">
+                    <IconButton
+                      size="small"
+                      onClick={handleTestNotification}
+                      color="primary"
+                    >
+                      <VolumeUpIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
-              )}
-            </Box>
+              </FormGroup>
 
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-              <LoadingButton
-                loading={isUpdating}
-                variant="contained"
-                onClick={handleSaveSettings}
-              >
-                Save Settings
-              </LoadingButton>
-            </Box>
-          </Paper>
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel id="alert-frequency-label">Alert Frequency</InputLabel>
+                <Select
+                  labelId="alert-frequency-label"
+                  id="alert-frequency"
+                  value={alertFrequency}
+                  label="Alert Frequency"
+                  onChange={(e) => setAlertFrequency(e.target.value as 'immediately' | 'daily' | 'weekly')}
+                >
+                  <MenuItem value="immediately">Immediately</MenuItem>
+                  <MenuItem value="daily">Daily Digest</MenuItem>
+                  <MenuItem value="weekly">Weekly Summary</MenuItem>
+                </Select>
+              </FormControl>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6" gutterBottom>
+                Locations
+              </Typography>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  Add locations to receive aurora viewing opportunities specific to your area.
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={8}>
+                    <TextField
+                      fullWidth
+                      label="Add Location"
+                      value={newLocation}
+                      onChange={(e) => setNewLocation(e.target.value)}
+                      placeholder="City, Country"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Button
+                      variant="contained"
+                      onClick={handleAddLocation}
+                      disabled={!newLocation}
+                      fullWidth
+                      sx={{ height: '100%' }}
+                    >
+                      Add
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                {locations.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    No locations added yet.
+                  </Typography>
+                ) : (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {locations.map((location) => (
+                      <Chip
+                        key={location}
+                        label={location}
+                        onDelete={() => handleRemoveLocation(location)}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+
+              <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+                <LoadingButton
+                  loading={isUpdating}
+                  variant="contained"
+                  onClick={handleSaveSettings}
+                >
+                  Save Settings
+                </LoadingButton>
+              </Box>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+      {/* Test notification toast */}
+      <Snackbar
+        open={testNotificationOpen}
+        autoHideDuration={6000}
+        onClose={() => setTestNotificationOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ mt: 7 }}
+      >
+        <Alert
+          onClose={() => setTestNotificationOpen(false)}
+          severity="warning"
+          variant="filled"
+          sx={{ width: '100%', fontSize: '0.95rem' }}
+        >
+          ⚡ Test: Geomagnetic storm alert! This is how your notification will look and sound.
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
 export default Profile;
+

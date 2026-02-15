@@ -30,18 +30,18 @@ const AuroraImages: React.FC = () => {
         <Paper sx={{ p: 2, boxShadow: 3 }}>
             <Box sx={{ p: 4 }}>
                 <Typography variant="h4" component="h1" gutterBottom>
-                    Aurora Images
+                    Aurora Live Images
                 </Typography>
                 <Grid container spacing={3}>
                     {images.map((image) => (
                         <Grid item xs={12} md={6} lg={4} key={image.id}>
                             <Card>
                                 <CardActionArea onClick={() => handleImageClick(image)}>
-                                    <CardMedia 
-                                        component="img" 
+                                    <CardMedia
+                                        component="img"
                                         height="200"
-                                        image={image.url} 
-                                        alt={image.title} 
+                                        image={image.url}
+                                        alt={image.title}
                                         sx={{ objectFit: 'cover' }}
                                     />
                                     <CardContent>
@@ -57,7 +57,7 @@ const AuroraImages: React.FC = () => {
                         </Grid>
                     ))}
                 </Grid>
-                
+
                 <AuroraImageViewer
                     open={!!selectedImage}
                     onClose={handleCloseViewer}

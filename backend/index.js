@@ -100,12 +100,12 @@ async function checkSolarActivity() {
       }
 
       if (currentKp >= threshold) {
-        // Only send if we haven't sent an alert too recently (e.g., in the last 6 hours)
+        // Only send if we haven't sent an alert too recently (e.g., in the last 1 hours)
         const lastAlertTime = user.lastAlertSent?.toDate() || new Date(0);
         const hoursSinceLastAlert =
           (new Date() - lastAlertTime) / (1000 * 60 * 60);
 
-        if (hoursSinceLastAlert >= 6) {
+        if (hoursSinceLastAlert >= 1) {
           console.log(
             `Alerting user ${recipientEmail} (Threshold: ${threshold})`,
           );

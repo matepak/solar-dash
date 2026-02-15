@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertsContext';
 import NoaaMagPlotContainer from '../components/NoaaMagPlotContainer';
 import MoonPhaseWidget from '../components/MoonPhaseWidget';
+import SolarImageWidget from '../components/SolarImageWidget';
 const Dashboard: React.FC = () => {
   const { currentKpValue, loading: kpLoading, error: kpError } = useKpIndexData();
   const { maxForecastedKp } = useKpForecastData();
@@ -98,7 +99,10 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} md={6}>
           <KpIndexGraph />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
+          <SolarImageWidget />
+        </Grid>
+        <Grid item xs={12} md={6}>
           <MoonPhaseWidget />
         </Grid>
         <Grid item xs={12}>

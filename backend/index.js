@@ -90,6 +90,14 @@ async function checkSolarActivity() {
     for (const doc of usersSnapshot.docs) {
       const user = doc.data();
       const threshold = user.alertSettings.kpThreshold || 5;
+      const recipientEmail = user.email;
+
+      if (!recipientEmail) {
+        console.warn(
+          `[User ${doc.id}] Skipping alert: No email address found in Firestore document.`,
+        );
+        continue;
+      }
 
       if (currentKp >= threshold) {
         // Only send if we haven't sent an alert too recently (e.g., in the last 6 hours)
@@ -98,31 +106,40 @@ async function checkSolarActivity() {
           (new Date() - lastAlertTime) / (1000 * 60 * 60);
 
         if (hoursSinceLastAlert >= 6) {
-          console.log(`Alerting user ${user.email} (Threshold: ${threshold})`);
-
-          await transporter.sendMail({
-            from: `"Solar Dash Alerts" <${process.env.SMTP_USER}>`,
-            to: user.email,
-            subject: `Aurora Alert: Kp Index reached ${currentKp}!`,
-            html: `
-              <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
-                <h1 style="color: #ff9800;">Solar Activity Alert</h1>
-                <p>The current <b>Kp index has reached ${currentKp}</b>.</p>
-                <p>This meets or exceeds your alert threshold of <b>Kp ${threshold}</b>.</p>
-                <p>Go outside or check the dashboard for aurora viewing opportunities!</p>
-                <a href="https://sdodash.webgrove.pl/" style="display: inline-block; padding: 10px 20px; background: #2196f3; color: white; text-decoration: none; border-radius: 5px;">View Live Dashboard</a>
-                <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
-                <p style="font-size: 0.8em; color: #777;">You received this because you enabled email alerts on Solar Dash.</p>
-              </div>
-            `,
-          });
-
-          // Update user's last alert time to prevent spam
-          alertsSent.push(
-            doc.ref.update({
-              lastAlertSent: admin.firestore.FieldValue.serverTimestamp(),
-            }),
+          console.log(
+            `Alerting user ${recipientEmail} (Threshold: ${threshold})`,
           );
+
+          try {
+            await transporter.sendMail({
+              from: `"Solar Dash Alerts" <${process.env.SMTP_USER}>`,
+              to: recipientEmail,
+              subject: `Aurora Alert: Kp Index reached ${currentKp}!`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+                  <h1 style="color: #ff9800;">Solar Activity Alert</h1>
+                  <p>The current <b>Kp index has reached ${currentKp}</b>.</p>
+                  <p>This meets or exceeds your alert threshold of <b>Kp ${threshold}</b>.</p>
+                  <p>Go outside or check the dashboard for aurora viewing opportunities!</p>
+                  <a href="https://sdodash.webgrove.pl/" style="display: inline-block; padding: 10px 20px; background: #2196f3; color: white; text-decoration: none; border-radius: 5px;">View Live Dashboard</a>
+                  <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
+                  <p style="font-size: 0.8em; color: #777;">You received this because you enabled email alerts on Solar Dash.</p>
+                </div>
+              `,
+            });
+
+            // Update user's last alert time to prevent spam
+            alertsSent.push(
+              doc.ref.update({
+                lastAlertSent: admin.firestore.FieldValue.serverTimestamp(),
+              }),
+            );
+          } catch (mailError) {
+            console.error(
+              `Failed to send email to ${recipientEmail}:`,
+              mailError.message,
+            );
+          }
         }
       }
     }

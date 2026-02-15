@@ -117,7 +117,11 @@ export const AlertsProvider: React.FC<AlertsProviderProps> = ({ children }) => {
         
         try {
           const userDocRef = doc(db, 'users', user.uid);
-          await setDoc(userDocRef, { alertSettings: newSettings }, { merge: true });
+          // Include email so the backend service knows where to send alerts
+          await setDoc(userDocRef, { 
+            alertSettings: newSettings,
+            email: user.email 
+          }, { merge: true });
           console.log('Firestore save successful');
         } catch (dbError: any) {
           if (dbError.message?.includes('failed-precondition') || dbError.code === 'unavailable') {

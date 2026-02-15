@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "alertSettings.emailAlerts", "order": "ASCENDING" },
+        { "fieldPath": "alertSettings.kpThreshold", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

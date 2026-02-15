@@ -28,7 +28,7 @@ import { useAlerts } from '../context/AlertsContext';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
-  const { alertSettings, updateAlertSettings, loading: alertsLoading } = useAlerts();
+  const { alertSettings, updateAlertSettings, loading: alertsLoading, isUpdating } = useAlerts();
   
   const [kpThreshold, setKpThreshold] = useState(alertSettings.kpThreshold);
   const [emailAlerts, setEmailAlerts] = useState(alertSettings.emailAlerts);
@@ -39,7 +39,6 @@ const Profile: React.FC = () => {
   
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   
   // Map Kp threshold to text label
   const getKpLabel = (value: number) => {
@@ -53,7 +52,6 @@ const Profile: React.FC = () => {
   
   const handleSaveSettings = async () => {
     try {
-      setIsSaving(true);
       setSaveSuccess(false);
       setSaveError(null);
       
@@ -66,11 +64,11 @@ const Profile: React.FC = () => {
       });
       
       setSaveSuccess(true);
+      // Automatically hide success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error: any) {
       console.error('Error saving settings:', error);
       setSaveError('Failed to save settings. Please try again.');
-    } finally {
-      setIsSaving(false);
     }
   };
   
@@ -276,7 +274,7 @@ const Profile: React.FC = () => {
             
             <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
               <LoadingButton
-                loading={isSaving}
+                loading={isUpdating}
                 variant="contained"
                 onClick={handleSaveSettings}
               >

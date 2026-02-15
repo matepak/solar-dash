@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -14,6 +14,18 @@ services:
       - NODE_ENV=development
       - REACT_APP_DISABLE_REGISTRATION=true
     restart: unless-stopped
-    # If you need to mount custom environment variables
+    env_file:
+      - .env.development
+
+  backend:
+    container_name: solar-dashboard-backend
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FIREBASE_SERVICE_ACCOUNT=${FIREBASE_SERVICE_ACCOUNT}
     env_file:
       - .env.development

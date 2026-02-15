@@ -1,0 +1,115 @@
+const admin = require("firebase-admin");
+const axios = require("axios");
+const cron = require("node-cron");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+
+// Initialize Firebase Admin
+// Note: You'll need to provide a service account JSON file
+// or use the Application Default Credentials if running on GCP
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+} else {
+  // Try to initialize without explicit credentials (for local dev if logged in via CLI)
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
+const NOAA_KP_URL =
+  "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json";
+
+// Setup Email Transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_PORT == 465,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+async function checkSolarActivity() {
+  console.log(`[${new Date().toISOString()}] Checking solar activity...`);
+
+  try {
+    // 1. Fetch latest Kp data
+    const response = await axios.get(NOAA_KP_URL);
+    const data = response.data;
+    const lastReading = data[data.length - 1];
+    const currentKp = parseFloat(lastReading[1]);
+
+    console.log(`Current Kp index: ${currentKp}`);
+
+    if (isNaN(currentKp)) throw new Error("Invalid Kp value");
+
+    // 2. Query users with active email alerts
+    const usersSnapshot = await db
+      .collection("users")
+      .where("alertSettings.emailAlerts", "==", true)
+      .get();
+
+    if (usersSnapshot.empty) {
+      console.log("No users found with email alerts enabled.");
+      return;
+    }
+
+    const alertsSent = [];
+
+    for (const doc of usersSnapshot.docs) {
+      const user = doc.data();
+      const threshold = user.alertSettings.kpThreshold || 5;
+
+      if (currentKp >= threshold) {
+        // Only send if we haven't sent an alert too recently (e.g., in the last 6 hours)
+        const lastAlertTime = user.lastAlertSent?.toDate() || new Date(0);
+        const hoursSinceLastAlert =
+          (new Date() - lastAlertTime) / (1000 * 60 * 60);
+
+        if (hoursSinceLastAlert >= 6) {
+          console.log(`Alerting user ${user.email} (Threshold: ${threshold})`);
+
+          await transporter.sendMail({
+            from: `"Solar Dash Alerts" <${process.env.SMTP_USER}>`,
+            to: user.email,
+            subject: `Aurora Alert: Kp Index reached ${currentKp}!`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+                <h1 style="color: #ff9800;">Solar Activity Alert</h1>
+                <p>The current <b>Kp index has reached ${currentKp}</b>.</p>
+                <p>This meets or exceeds your alert threshold of <b>Kp ${threshold}</b>.</p>
+                <p>Go outside or check the dashboard for aurora viewing opportunities!</p>
+                <a href="https://sdodash.webgrove.pl/" style="display: inline-block; padding: 10px 20px; background: #2196f3; color: white; text-decoration: none; border-radius: 5px;">View Live Dashboard</a>
+                <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
+                <p style="font-size: 0.8em; color: #777;">You received this because you enabled email alerts on Solar Dash.</p>
+              </div>
+            `,
+          });
+
+          // Update user's last alert time to prevent spam
+          alertsSent.push(
+            doc.ref.update({
+              lastAlertSent: admin.firestore.FieldValue.serverTimestamp(),
+            }),
+          );
+        }
+      }
+    }
+
+    await Promise.all(alertsSent);
+    console.log(`Alert check complete. ${alertsSent.length} alerts sent.`);
+  } catch (error) {
+    console.error("Error in checkSolarActivity:", error.message);
+  }
+}
+
+// Run every 15 minutes
+cron.schedule("*/15 * * * *", checkSolarActivity);
+
+// Initial run on startup
+checkSolarActivity();
+
+console.log("Solar Dash Backend Service Started.");

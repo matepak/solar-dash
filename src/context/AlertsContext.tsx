@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { useAuth } from './AuthContext';
+import { useAuth, app } from './AuthContext';
 
 interface AlertSettings {
   kpThreshold: number;
@@ -14,6 +14,7 @@ interface AlertsContextType {
   alertSettings: AlertSettings;
   updateAlertSettings: (settings: Partial<AlertSettings>) => Promise<void>;
   loading: boolean;
+  isUpdating: boolean;
   error: string | null;
 }
 
@@ -35,9 +36,10 @@ export const AlertsProvider: React.FC<AlertsProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const [alertSettings, setAlertSettings] = useState<AlertSettings>(defaultAlertSettings);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const db = getFirestore();
+  const db = getFirestore(app);
 
   // Check if the current user is the demo user
   const isDemoUser = user?.uid === 'demo-user-id';
@@ -92,31 +94,46 @@ export const AlertsProvider: React.FC<AlertsProviderProps> = ({ children }) => {
   // Update user's alert settings
   const updateAlertSettings = async (settings: Partial<AlertSettings>) => {
     if (!user) {
+      console.error('Save failed: No user logged in');
       throw new Error('User must be logged in to update alert settings');
     }
 
     try {
-      setLoading(true);
+      setIsUpdating(true);
       setError(null);
+      console.log('Attempting to save alert settings:', settings);
 
       const newSettings = { ...alertSettings, ...settings };
 
       if (isDemoUser) {
-        // For demo user, save settings to localStorage
+        console.log('Demo user: Saving to localStorage...');
         localStorage.setItem('demoUserAlertSettings', JSON.stringify(newSettings));
+        console.log('localStorage save complete');
       } else {
-        // For regular users, save settings to Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        await updateDoc(userDocRef, { alertSettings: newSettings });
+        console.log('Real user: Saving to Firestore for UID:', user.uid);
+        if (!app.options.apiKey || app.options.apiKey === 'your-api-key') {
+          throw new Error('Firebase is not configured. Please check your .env file.');
+        }
+        
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          await setDoc(userDocRef, { alertSettings: newSettings }, { merge: true });
+          console.log('Firestore save successful');
+        } catch (dbError: any) {
+          if (dbError.message?.includes('failed-precondition') || dbError.code === 'unavailable') {
+            throw new Error('Connection to Firestore failed. If you have an ad-blocker enabled, please disable it for this site.');
+          }
+          throw dbError;
+        }
       }
 
       setAlertSettings(newSettings);
     } catch (err: any) {
-      setError(err.message);
       console.error('Error updating alert settings:', err);
+      setError(err.message);
       throw err;
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -124,6 +141,7 @@ export const AlertsProvider: React.FC<AlertsProviderProps> = ({ children }) => {
     alertSettings,
     updateAlertSettings,
     loading,
+    isUpdating,
     error
   };
 

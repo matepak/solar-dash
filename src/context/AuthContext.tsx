@@ -22,8 +22,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+
+// Check for missing Firebase config
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'your-api-key') {
+  console.warn('Firebase configuration is missing or using placeholder values. Firestore features will not work. Please check your .env.development file.');
+}
 
 // Mock demo user data
 const MOCK_DEMO_USER: FirebaseUser = {

@@ -31,3 +31,7 @@ yarn-error.log*
 # cursor
 .cursorrules
 .cursor/rules
+
+# package-lock.json
+package-lock.json
+package-lock.json

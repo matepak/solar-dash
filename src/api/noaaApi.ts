@@ -89,6 +89,10 @@ export const fetchKpIndexData = async (): Promise<KpIndexData[]> => {
     const response = await axios.get(KP_INDEX_URL);
     const data = response.data;
 
+    if (!Array.isArray(data)) {
+      throw new Error('Unexpected Kp index data format: expected an array');
+    }
+
     // Skip the header row
     const processedData = data.slice(1).map((row: any) => {
       const kpValue = parseFloat(row[1]);
@@ -113,6 +117,10 @@ export const fetchMagData = async (): Promise<MagData[]> => {
   try {
     const response = await axios.get(NOAA_MAG_URL);
     const data = response.data;
+
+    if (!Array.isArray(data)) {
+      throw new Error('Unexpected mag data format: expected an array');
+    }
 
     // Skip the header row
     const processedData = data.slice(1).map((row: any) => {
@@ -140,6 +148,10 @@ export const fetchPlasmaData = async (): Promise<PlasmaData[]> => {
     const response = await axios.get(NOAA_PLASMA_URL);
     const data = response.data;
 
+    if (!Array.isArray(data)) {
+      throw new Error('Unexpected plasma data format: expected an array');
+    }
+
     // Skip the header row
     const processedData = data.slice(1).map((row: any) => {
       return {
@@ -164,6 +176,10 @@ export const fetchKpForecastData = async (): Promise<KpForecastData[]> => {
   try {
     const response = await axios.get(KP_FORECAST_URL);
     const data = response.data;
+
+    if (!Array.isArray(data)) {
+      throw new Error('Unexpected Kp forecast data format: expected an array');
+    }
 
     // Skip the header row
     const processedData = data.slice(1)

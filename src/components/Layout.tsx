@@ -73,8 +73,6 @@ const Layout: React.FC = () => {
     { text: 'Alerts', icon: <NotificationsIcon />, path: '/alerts' },
     { text: 'Solar Images', icon: <ImageIcon />, path: '/images' },
     { text: 'Aurora Gallery', icon: <ImageIcon />, path: '/gallery' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/profile', requiresAuth: true },
-    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
   const drawer = (

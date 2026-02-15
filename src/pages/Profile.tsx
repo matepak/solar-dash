@@ -37,6 +37,17 @@ const Profile: React.FC = () => {
   const [locations, setLocations] = useState<string[]>(alertSettings.locations || []);
   const [newLocation, setNewLocation] = useState('');
   
+  // Update local state when alertSettings are loaded from context
+  React.useEffect(() => {
+    if (!alertsLoading) {
+      setKpThreshold(alertSettings.kpThreshold);
+      setEmailAlerts(alertSettings.emailAlerts);
+      setPushNotifications(alertSettings.pushNotifications);
+      setAlertFrequency(alertSettings.alertFrequency);
+      setLocations(alertSettings.locations || []);
+    }
+  }, [alertSettings, alertsLoading]);
+
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   

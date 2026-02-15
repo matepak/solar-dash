@@ -27,7 +27,7 @@ Demo app is available at https://sdodash.webgrove.pl/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/solar-dashboard.git
+git clone https://github.com/matepak/solar-dashboard.git
 cd solar-dashboard
 
 # Install dependencies

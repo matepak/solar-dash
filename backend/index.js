@@ -1,20 +1,48 @@
+const path = require("path");
+require("dotenv").config({
+  path: path.resolve(__dirname, "../.env.development"),
+});
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const admin = require("firebase-admin");
 const axios = require("axios");
 const cron = require("node-cron");
 const nodemailer = require("nodemailer");
-require("dotenv").config();
+const fs = require("fs");
 
 // Initialize Firebase Admin
-// Note: You'll need to provide a service account JSON file
-// or use the Application Default Credentials if running on GCP
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-} else {
-  // Try to initialize without explicit credentials (for local dev if logged in via CLI)
-  admin.initializeApp();
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    let serviceAccount;
+    try {
+      // Try to parse as JSON string
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log("Firebase initialized using JSON string from environment.");
+    } catch (e) {
+      // If parsing fails, try to treat it as a file path
+      if (fs.existsSync(process.env.FIREBASE_SERVICE_ACCOUNT)) {
+        serviceAccount = JSON.parse(
+          fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT, "utf8"),
+        );
+        console.log(
+          `Firebase initialized using file: ${process.env.FIREBASE_SERVICE_ACCOUNT}`,
+        );
+      } else {
+        throw new Error(
+          "FIREBASE_SERVICE_ACCOUNT is neither valid JSON nor a valid file path.",
+        );
+      }
+    }
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } else {
+    admin.initializeApp();
+    console.log("Firebase initialized with default credentials.");
+  }
+} catch (error) {
+  console.error("CRITICAL: Failed to initialize Firebase Admin SDK:");
+  console.error(error.message);
+  process.exit(1);
 }
 
 const db = admin.firestore();

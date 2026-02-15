@@ -3,6 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Install dependencies separately to leverage Docker cache
+COPY package*.json ./
+RUN npm ci
+
 # Define build arguments (mapped in docker-compose.yml)
 ARG REACT_APP_FIREBASE_API_KEY
 ARG REACT_APP_FIREBASE_AUTH_DOMAIN
@@ -45,15 +49,12 @@ ENV REACT_APP_FIREBASE_API_KEY=$REACT_APP_FIREBASE_API_KEY \
     REACT_APP_ENABLE_SOLAR_IMAGES=$REACT_APP_ENABLE_SOLAR_IMAGES \
     REACT_APP_ENABLE_OFFLINE_MODE=$REACT_APP_ENABLE_OFFLINE_MODE
 
-# Install dependencies separately to leverage Docker cache
-COPY package*.json ./
-RUN npm ci
 
 # Copy source and build
 COPY . .
-# Keep memory limit for large builds
+# Keep memory limit for large builds and disable sourcemaps for speed
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build
+RUN GENERATE_SOURCEMAP=false npm run build
 
 # Production stage
 FROM nginx:alpine
